@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,9 +40,17 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
-        <TooltipProvider>{children}</TooltipProvider>
+      <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-200">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
