@@ -7,19 +7,54 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/components/auth-provider";
+import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [role, setRole] = useState("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const result = await login(email, password);
+    setIsSubmitting(false);
+    
+    if (!result.success) {
+      setError(result.error || "Login failed. Please try again.");
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "/auth/google-consent";
+  };
+
+  const handleLinkedInLogin = () => {
+    window.location.href = "/auth/linkedin-consent";
+  };
 
   return (
     <Card className="bg-white shadow-xl border-0 ring-1 ring-gray-200">
       <CardContent className="p-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
           <p className="text-sm text-gray-500 mt-2">Please sign in to your account</p>
         </div>
 
-        <Tabs value={role} onValueChange={setRole} className="w-full mb-8">
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <Tabs value={role} onValueChange={setRole} className="w-full mb-6">
           <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1">
             <TabsTrigger value="student" className="data-[state=active]:bg-white data-[state=active]:text-[#002855] data-[state=active]:shadow-sm">
               Student
@@ -30,13 +65,15 @@ export default function LoginPage() {
           </TabsList>
         </Tabs>
 
-        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input 
               id="email" 
               type="email" 
               placeholder={role === "student" ? "name.batch@nsut.ac.in" : "name@example.com"} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required 
               className="h-11"
             />
@@ -45,15 +82,26 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="#" className="text-xs font-medium text-[#002855] hover:underline">
+              <Link href="/forgot-password" className="text-xs font-semibold text-[#002855] hover:underline">
                 Forgot password?
               </Link>
             </div>
-            <Input id="password" type="password" required className="h-11" />
+            <Input 
+              id="password" 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
+              className="h-11" 
+            />
           </div>
 
-          <Button type="submit" className="w-full bg-[#002855] hover:bg-[#001f42] text-white h-11 text-base font-semibold mt-2">
-            Sign In
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full bg-[#002855] hover:bg-[#001f42] text-white h-11 text-base font-semibold mt-2 transition-all duration-150 active:scale-[0.98]"
+          >
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
@@ -67,8 +115,12 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
-          <Button variant="outline" className="h-11 text-gray-700 bg-white hover:bg-gray-50">
-            {/* Google icon simple svg since lucide doesn't have it natively */}
+          <Button 
+            variant="outline" 
+            type="button"
+            onClick={handleGoogleLogin}
+            className="h-11 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-all duration-150 active:scale-[0.98]"
+          >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -77,7 +129,12 @@ export default function LoginPage() {
             </svg>
             Google
           </Button>
-          <Button variant="outline" className="h-11 text-gray-700 bg-white hover:bg-gray-50">
+          <Button 
+            variant="outline" 
+            type="button"
+            onClick={handleLinkedInLogin}
+            className="h-11 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-all duration-150 active:scale-[0.98]"
+          >
             <svg className="w-5 h-5 mr-2 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>

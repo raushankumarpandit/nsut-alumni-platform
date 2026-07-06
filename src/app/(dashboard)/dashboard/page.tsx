@@ -15,38 +15,98 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { alumni, students, mentorshipRequests, opportunities } from "@/lib/data/mock-data";
 import { getInitials, getStatusColor, formatDate } from "@/lib/utils";
+import { Branch, Domain, AvailabilityStatus } from "@/lib/types";
+
+import { useAuth } from "@/components/auth-provider";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
   const [role, setRole] = useState<"student" | "alumni">("student");
-  
-  // Mock current user
-  const student = students[0];
-  const alum = alumni[0];
+
+  // Sync state with user's role on load
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRole(user.role as "student" | "alumni");
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#002855]"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  // Adapt database user to Student interface expected by StudentDashboard
+  const studentData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar || "",
+    currentYear: user.currentYear || 3,
+    branch: (user.branch || "CSE") as Branch,
+    interests: (user.company ? ["Software Engineering"] : []) as Domain[],
+    careerGoals: user.roleTitle ? `Work as ${user.roleTitle}` : "SDE at a top tech company",
+    savedMentors: ["alum-001", "alum-003"],
+    joinedAt: user.joinedAt,
+  };
+
+  // Adapt database user to Alumni interface expected by AlumniDashboard
+  const alumData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar || "",
+    graduationYear: user.graduationYear || 2022,
+    branch: (user.branch || "CSE") as Branch,
+    currentCompany: user.company || "NSUT",
+    role: user.roleTitle || "Alumni",
+    domain: "Software Engineering" as Domain,
+    yearsOfExperience: 2,
+    location: "Delhi",
+    country: "India",
+    bio: "Passionate NSUT graduate willing to support the community.",
+    skills: ["DSA", "System Design"],
+    availability: "available" as AvailabilityStatus,
+    verificationStatus: user.verificationStatus || "verified",
+    socialLinks: { linkedin: user.linkedin || "" },
+    isHigherStudies: false,
+    mentorshipCount: 0,
+    rating: 5.0,
+    joinedAt: user.joinedAt,
+  };
 
   return (
     <div className="space-y-6">
-      {/* Role Toggle for Demo Purposes */}
-      <div className="flex justify-end mb-4">
-        <div className="bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm">
-          <button
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${role === "student" ? "bg-[#002855] text-white" : "text-gray-600 hover:bg-gray-100"}`}
-            onClick={() => setRole("student")}
-          >
-            Student View
-          </button>
-          <button
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${role === "alumni" ? "bg-[#002855] text-white" : "text-gray-600 hover:bg-gray-100"}`}
-            onClick={() => setRole("alumni")}
-          >
-            Alumni View
-          </button>
+      {/* Role Toggle (Only shown for Admin users or demo convenience) */}
+      {(user.role === "admin" || process.env.NODE_ENV === "development") && (
+        <div className="flex justify-end mb-4">
+          <div className="bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm">
+            <button
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${role === "student" ? "bg-[#002855] text-white" : "text-gray-600 hover:bg-gray-100"}`}
+              onClick={() => setRole("student")}
+            >
+              Student View
+            </button>
+            <button
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${role === "alumni" ? "bg-[#002855] text-white" : "text-gray-600 hover:bg-gray-100"}`}
+              onClick={() => setRole("alumni")}
+            >
+              Alumni View
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {role === "student" ? (
-        <StudentDashboard student={student} />
+        <StudentDashboard student={studentData} />
       ) : (
-        <AlumniDashboard alum={alum} />
+        <AlumniDashboard alum={alumData} />
       )}
     </div>
   );

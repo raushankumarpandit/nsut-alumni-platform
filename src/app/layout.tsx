@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,6 +30,28 @@ export const metadata: Metadata = {
     "career guidance",
     "placements",
   ],
+  openGraph: {
+    title: "NSUT Alumni Network — Connect Beyond Graduation",
+    description: "The official alumni mentorship platform for Netaji Subhas University of Technology.",
+    url: "https://nsut-alumni-platform.vercel.app",
+    siteName: "NSUT Alumni Network",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "NSUT Alumni Network Link Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NSUT Alumni Network — Connect Beyond Graduation",
+    description: "The official alumni mentorship platform for Netaji Subhas University of Technology.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({
@@ -49,7 +72,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>{children}</TooltipProvider>
+          <AuthProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

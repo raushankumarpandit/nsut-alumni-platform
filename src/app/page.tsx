@@ -14,6 +14,8 @@ import {
 import { alumni, forumPosts, opportunities, events, alumniStories } from "@/lib/data/mock-data";
 import { getInitials, formatRelativeTime, truncateText } from "@/lib/utils";
 
+import { useState, useEffect } from "react";
+
 export default function LandingPage() {
   const featuredAlumni = alumni.slice(0, 8);
   const topMentors = alumni.filter(a => a.availability === "available").slice(0, 4);
@@ -22,9 +24,31 @@ export default function LandingPage() {
   const latestOpportunities = opportunities.slice(0, 3);
   const trendingDiscussions = forumPosts.slice(0, 4);
 
+  const [stats, setStats] = useState({
+    alumni: 780,
+    mentors: 120,
+    sessions: 450,
+    companies: 50,
+  });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setStats(data);
+        }
+      })
+      .catch((err) => console.error("Error loading stats", err));
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
+      <div className="bg-[#002855] text-white px-4 py-2.5 text-center text-xs font-semibold tracking-wide flex items-center justify-center gap-1.5 shadow-inner">
+        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        🚀 NSUT Alumni Network Demo — Pre-Launch Beta Mode. Explore using registered emails or simulated Google/LinkedIn logins.
+      </div>
 
       <main className="flex-1">
         {/* Section 1: Hero */}
@@ -39,7 +63,7 @@ export default function LandingPage() {
                   Connect Beyond <br className="hidden md:block"/> Graduation
                 </h1>
                 <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
-                  The official mentorship and networking platform for Netaji Subhas University of Technology. Connect with 780+ alumni across 15+ countries for career guidance, internships, and community building.
+                  The official mentorship and networking platform for Netaji Subhas University of Technology. Connect with {stats.alumni}+ alumni across 15+ countries for career guidance, internships, and community building.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -57,28 +81,28 @@ export default function LandingPage() {
                     <Users className="w-4 h-4" />
                     <span className="text-sm font-medium">Alumni</span>
                   </div>
-                  <p className="text-2xl font-bold text-[#002855]">780+</p>
+                  <p className="text-2xl font-bold text-[#002855]">{stats.alumni}+</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <UserCheck className="w-4 h-4" />
                     <span className="text-sm font-medium">Mentors</span>
                   </div>
-                  <p className="text-2xl font-bold text-[#002855]">120+</p>
+                  <p className="text-2xl font-bold text-[#002855]">{stats.mentors}+</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <CalendarDays className="w-4 h-4" />
                     <span className="text-sm font-medium">Sessions</span>
                   </div>
-                  <p className="text-2xl font-bold text-[#002855]">450+</p>
+                  <p className="text-2xl font-bold text-[#002855]">{stats.sessions}+</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <Building2 className="w-4 h-4" />
                     <span className="text-sm font-medium">Companies</span>
                   </div>
-                  <p className="text-2xl font-bold text-[#002855]">50+</p>
+                  <p className="text-2xl font-bold text-[#002855]">{stats.companies}+</p>
                 </div>
               </div>
             </div>

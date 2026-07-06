@@ -12,6 +12,7 @@ export function ThemeToggle() {
 
   // Avoid hydration mismatch by waiting until client-side mount
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
@@ -28,7 +29,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="text-gray-600 hover:text-[#002855] dark:text-gray-300 dark:hover:text-white"
+      className="text-gray-600 hover:text-[#002855] dark:text-gray-300 dark:hover:text-white transition-transform duration-200 active:scale-90 active:rotate-45"
     >
       {theme === "dark" ? (
         <Sun className="h-5 w-5 text-yellow-500" />
